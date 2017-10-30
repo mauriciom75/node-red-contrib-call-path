@@ -16,13 +16,24 @@ module.exports = function(RED) {
         var node = this;
         node.primeraPasada = true;
 
+        console.log( " - node_id : " + node.id );
+        var returnEventName = "call_path_" + node.id;
+        var eventName = "call_path_" + node.varName;
 
         node.on('input', function(msg) {
             
             //if ( node.eventEmitter.listenerCount(node.varName) > 0 )
             {
+                if (!msg.callPath)
+                    msg.callPath = {};
+                if (!msg.callPath.stack)
+                    msg.callPath.stack = [];
+
+                // en el mensaje dejo en un stack la dirección de respuesta.
+                msg.callPath.stack.push({name:eventName,ret:returnEventName});
+
                 console.log("genero evento");
-                eventEmitter.emit(node.varName, msg);
+                eventEmitter.emit(eventName, msg);
             }
             /*
             else
@@ -30,6 +41,25 @@ module.exports = function(RED) {
                 node.send([null,msg]);
             }*/
         });
+
+        // evento de respuesta para este nodo
+        eventEmitter.removeAllListeners(returnEventName);
+        eventEmitter.on(returnEventName, function (msg) {
+
+            console.log("llegó evento de return");
+
+            if ( msg.callPath.error ) {
+                console.log ("Genero error.");
+                if (msg.callPath.error.message)
+                    node.error(msg.callPath.error.message,msg)
+                else
+                    node.error("Error indeterminado.",msg)
+            }
+            else {
+                node.send([msg]); // envio por la salida 1
+            }
+        });
+
     }
     function returnPathNode(config) {
         RED.nodes.createNode(this,config);
@@ -47,8 +77,11 @@ module.exports = function(RED) {
             
             //if ( node.eventEmitter.listenerCount(node.varName) > 0 )
             {
-                console.log("genero evento ret");
-                eventEmitter.emit(node.varName+"_ret", msg);
+
+                var returnEventName = msg.callPath.stack.pop().ret;
+
+                console.log("genero evento return :" + returnEventName );
+                eventEmitter.emit(returnEventName, msg);
             }
             /*
             else
@@ -70,10 +103,13 @@ module.exports = function(RED) {
         var node = this;
         node.primeraPasada = true;
         
+        var eventName = "call_path_" + node.varName;
 
-        eventEmitter.on(node.varName, function (msg) {
+        eventEmitter.removeAllListeners(eventName);
+        eventEmitter.on(eventName, function (msg) {
 
             console.log("llegó evento");
+            if ( msg.callPath.error ) delete msg.callPath.error;
             node.send([msg]); // envio por la salida 1
 
         }); 
@@ -93,8 +129,12 @@ module.exports = function(RED) {
 
             //console.log("return original_wires:" + JSON.stringify(msg.insertNode[node.varName].original_wires) );
             // el proximo nodo será el nodo al cual quiero saltar.
-            if (msg.error) msg.insertNode[node.varName].error = msg.error;
-            if (msg._error) msg.insertNode[node.varName]._error = msg._error;
+
+            if (msg.error) {
+                msg.callPath.error = Object.assign({}, msg.error);
+                msg.callPath.error_stack = Object.assign({}, msg.callPath.stack ); 
+            };
+            if (msg._error) msg.callPath._error = msg._error;
 
             node.send(msg);
             
@@ -110,8 +150,10 @@ module.exports = function(RED) {
 
         var node = this;
 
+        var eventName = "call_path_" + node.varName;
 
-        eventEmitter.on(node.varName, function (msg) {
+        eventEmitter.removeAllListeners(eventName);
+        eventEmitter.on(eventName, function (msg) {
 
             console.log("llegó evento ret");
             node.send([msg]); // envio por la salida 1
