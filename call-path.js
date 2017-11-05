@@ -143,7 +143,7 @@ module.exports = function(RED) {
 
 
 
-    function returnNode(config) {
+    function returnNode2(config) {
         RED.nodes.createNode(this,config);
 
         this.varName = config.paths;
@@ -166,5 +166,5 @@ module.exports = function(RED) {
     RED.nodes.registerType("return-path-node",returnPathNode);
     RED.nodes.registerType("declare-path-node",declarePathNode);
     RED.nodes.registerType("catch-node2",catchNodeNode2);
-    RED.nodes.registerType("return-node",returnNode);
+    RED.nodes.registerType("return-node2",returnNode2);
 }
