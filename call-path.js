@@ -166,5 +166,9 @@ module.exports = function(RED) {
     RED.nodes.registerType("return-path-node",returnPathNode);
     RED.nodes.registerType("declare-path-node",declarePathNode);
     RED.nodes.registerType("catch-node2",catchNodeNode2);
+<<<<<<< HEAD
     RED.nodes.registerType("return-node2",returnNode2);
+=======
+    RED.nodes.registerType("return-call-path",returnNode);
+>>>>>>> 37a5fa43884cc925d330e7f7daf510042dcb844e
 }

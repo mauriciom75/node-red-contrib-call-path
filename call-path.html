@@ -256,7 +256,11 @@
 
 <script type="text/javascript">
 
+<<<<<<< HEAD
     RED.nodes.registerType('return-node2',{
+=======
+    RED.nodes.registerType('return-call-path',{
+>>>>>>> 37a5fa43884cc925d330e7f7daf510042dcb844e
         category: 'function',
         color: "rgb(112, 216, 130)",
         defaults: {
@@ -269,12 +273,20 @@
         outputs:1,
         icon: "node-red-contrib-insert-node.png",
         label: function() {
+<<<<<<< HEAD
             return this.name||"return-node2";
+=======
+            return this.name||"return-call-path";
+>>>>>>> 37a5fa43884cc925d330e7f7daf510042dcb844e
         }
     });
 </script>
 
+<<<<<<< HEAD
 <script type="text/x-red" data-template-name="return-node2">
+=======
+<script type="text/x-red" data-template-name="return-call-path">
+>>>>>>> 37a5fa43884cc925d330e7f7daf510042dcb844e
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -297,7 +309,11 @@
     </div>
 </script>
 
+<<<<<<< HEAD
 <script type="text/x-red" data-help-name="return-node2">
+=======
+<script type="text/x-red" data-help-name="return-call-path">
+>>>>>>> 37a5fa43884cc925d330e7f7daf510042dcb844e
     <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
 </script>
 
