@@ -33,7 +33,17 @@ module.exports = function(RED) {
                 msg.callPath.stack.push({name:eventName,ret:returnEventName});
 
                 console.log("genero evento");
-                eventEmitter.emit(eventName, msg);
+                if (msg.callPath[node.varName])
+                {
+                    console.log("Rutina redefinida");
+                    eventName = msg.callPath[node.varName].eventName;
+                    msg.callPath.callRutina = node.varName;
+                }
+                if ( eventEmitter.listenerCount(eventName) ) {
+                    eventEmitter.emit(eventName, msg);
+                } else {
+                    node.error("Undefined path "+ eventName , msg);
+                }
             }
             /*
             else
@@ -161,10 +171,72 @@ module.exports = function(RED) {
         }); 
           
         //});
-    }    
+    }
+
+
+    function declarePaths(config) {
+        RED.nodes.createNode(this,config);
+
+        this.salidas = config.salidas;
+        this.esPath = Number(config.timeout);
+
+        var node = this;
+
+        var eventName = "call_path_" + node.id;
+        eventEmitter.removeAllListeners(eventName);
+        eventEmitter.on(eventName, function (msg) {
+
+            console.log("llegó evento a declarePaths");
+            if ( msg.callPath.error ) delete msg.callPath.error;
+            var callRutina = msg.callPath.callRutina;
+            var vectorOut = [];
+            vectorOut[msg.callPath[callRutina].nro] = msg; 
+            node.send(vectorOut);
+        });
+
+
+
+        node.primeraPasada = true;
+        
+        node.on('input', function(msg) {
+            
+            node.primeraPasada = false;
+
+            // en la segunda salida está el nodo a declarar
+            //console.log("declare wires:" + JSON.stringify(aux_wires) );
+
+            //node.context.flow.set("nodeTo",node.wires);
+            //table[node.varName] = {};
+            //table[node.varName].wires = aux_wires;
+            //table[node.varName].esPath = node.esPath;
+
+            if (!msg.callPath) msg.callPath = {};
+
+            for (var i = 1 ; i < node.salidas.length ; i++)
+            {
+                varName = node.salidas[i];
+                //aux_wires = [node.wires[i]];
+
+                msg.callPath[varName] = {};
+                msg.callPath[varName].eventName = eventName;
+                msg.callPath[varName].nro = i;
+            }
+
+            node.send([msg]); // envio por la salida 1
+            
+        });
+
+
+    }
+
+
+
+
+
     RED.nodes.registerType("call-node",callNode2);
-    RED.nodes.registerType("return-path-node",returnPathNode);
+    RED.nodes.registerType("return-path",returnPathNode);
     RED.nodes.registerType("declare-path-node",declarePathNode);
     RED.nodes.registerType("catch-node2",catchNodeNode2);
     RED.nodes.registerType("return-node2",returnNode2);
+    RED.nodes.registerType("declare-paths",declarePaths);
 }
