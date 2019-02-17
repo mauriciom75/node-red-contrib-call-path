@@ -30,7 +30,7 @@ module.exports = function(RED) {
                     msg.callPath.stack = [];
 
                 // en el mensaje dejo en un stack la dirección de respuesta.
-                msg.callPath.stack.push({name:eventName,ret:returnEventName});
+                msg.callPath.stack.push({name:node.varName,eventName:eventName,eventRet:returnEventName});
 
                 console.log("genero evento");
                 if (msg.callPath[node.varName])
@@ -88,7 +88,7 @@ module.exports = function(RED) {
             //if ( node.eventEmitter.listenerCount(node.varName) > 0 )
             {
 
-                var returnEventName = msg.callPath.stack.pop().ret;
+                var returnEventName = msg.callPath.stack.pop().eventRet;
 
                 console.log("genero evento return :" + returnEventName );
                 eventEmitter.emit(returnEventName, msg);
@@ -125,7 +125,7 @@ module.exports = function(RED) {
         }); 
         
     }
-    function catchNodeNode2(config) {
+    function catchNodeNode2(config) {  // ver si incluir un return
         RED.nodes.createNode(this,config);
 
         this.varName = config.paths;
@@ -137,12 +137,16 @@ module.exports = function(RED) {
             
             node.primeraPasada = false;
 
-            //console.log("return original_wires:" + JSON.stringify(msg.insertNode[node.varName].original_wires) );
-            // el proximo nodo será el nodo al cual quiero saltar.
 
             if (msg.error) {
                 msg.callPath.error = Object.assign({}, msg.error);
-                msg.callPath.error_stack = Object.assign({}, msg.callPath.stack ); 
+
+                if ( ! msg.callPath.error_stack )
+                    msg.callPath.error_stack =Object.assign([], []);
+
+                msg.callPath.error_stack.push(msg.error);
+
+                msg.callPath.error_call_stack = Object.assign({}, msg.callPath.stack ); 
             };
             if (msg._error) msg.callPath._error = msg._error;
 
@@ -232,6 +236,103 @@ module.exports = function(RED) {
 
 
 
+    function rethrowPathNode(config) {
+
+// si está dentro de un contecto callPaths, lo que hace es preparar la estructura interna del error
+// para que el nodo call llamador, lance el error.
+// si no está en el contexto deja pasar el mensaje.
+
+        RED.nodes.createNode(this,config);
+
+        this.toWires = {};//JSON.parse(config.paths);
+        //this.varName = JSON.parse(config.paths);
+        this.varName = config.paths;
+        //this.eventEmitter = new event.EventEmitter();
+
+        var node = this;
+        node.primeraPasada = true;
+
+        console.log("varName: "+this.varName);
+        node.on('input', function(msg) {
+
+            node.primeraPasada = false;
+
+            if (msg.callPath.stack.length >= 1)  // quiere decir que el error fué lanzado dentro de un subflujo callPath.
+            {                       // Indico al nodo llamador para que lance una excepción en su contexto.
+                                    // no envio mensage por la salida, pero sería buena opción para agregar. 
+
+                if (msg.error) {
+                    msg.callPath.error = Object.assign({}, msg.error);
+
+                    if ( ! msg.callPath.error_stack )
+                        msg.callPath.error_stack =Object.assign([], []);
+                    msg.callPath.error_stack.push(msg.error);
+                    
+                        msg.callPath.error_call_stack = Object.assign({}, msg.callPath.stack ); 
+                };
+                if (msg._error) msg.callPath._error = msg._error;
+
+                {
+
+                    var returnEventName = msg.callPath.stack.pop().eventRet;
+
+                    console.log("rethrow: genero evento return :" + returnEventName );
+                    eventEmitter.emit(returnEventName, msg);
+                }
+                
+            }
+            else
+            {
+                node.send(msg);
+            }
+        });
+    }
+
+
+
+
+
+
+    function catchFilterPathNode(config) {
+
+// filtra los errores lanzados por un contexto/flujo en particular.
+// luego de un catch, se pone el filtro para hacer un tratamiento en particular para el contexto/rutina.
+// sin el contexto no funciona. Util para multiples flows en la misma solapa.
+// ver en las inserciones como diferenciar porque la rutina se llama igual. Se puede poner nombreExt:nombreInt
+// una practica sería que todos los subflows tuvieran su filtro para que no haya que declarar uno general que atrape todo.
+// sería bueno crear un contexto para la rutina principal.
+
+        RED.nodes.createNode(this,config);
+
+        this.toWires = {};//JSON.parse(config.paths);
+        //this.varName = JSON.parse(config.paths);
+        this.varName = config.paths;
+        //this.eventEmitter = new event.EventEmitter();
+
+        var node = this;
+        node.primeraPasada = true;
+
+        console.log("varName: "+this.varName);
+        node.on('input', function(msg) {
+
+            node.primeraPasada = false;
+
+            if (msg.callPath.stack.length >= 1)  // quiere decir que el error fué lanzado dentro de un subflujo callPath.
+            {                       // Indico al nodo llamador para que lance una excepción en su contexto.
+                                    // no envio mensage por la salida, pero sería buena opción para agregar. 
+                if (msg.callPath.stack[msg.callPath.stack.length-1].name ==  this.varName)
+                    node.send(msg);
+            }
+        });
+    }
+
+
+
+
+
+
+
+
 
     RED.nodes.registerType("call-node",callNode2);
     RED.nodes.registerType("return-path",returnPathNode);
@@ -239,4 +340,6 @@ module.exports = function(RED) {
     RED.nodes.registerType("catch-node2",catchNodeNode2);
     RED.nodes.registerType("return-node2",returnNode2);
     RED.nodes.registerType("declare-paths",declarePaths);
+    RED.nodes.registerType("rethrow-path",rethrowPathNode);
+    RED.nodes.registerType("catch-filter-path",catchFilterPathNode);
 }
