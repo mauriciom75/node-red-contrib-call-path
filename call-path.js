@@ -29,16 +29,31 @@ module.exports = function(RED) {
                 if (!msg.callPath.stack)
                     msg.callPath.stack = [];
 
-                // en el mensaje dejo en un stack la dirección de respuesta.
-                msg.callPath.stack.push({name:node.varName,eventName:eventName,eventRet:returnEventName});
-
                 console.log("genero evento");
-                if (msg.callPath[node.varName])
+                msg.callPath.subFlowInvocado = node.varName;
+
+                if (msg.callPath[msg.callPath.subFlowInvocado])
                 {
-                    console.log("Rutina redefinida");
-                    eventName = msg.callPath[node.varName].eventName;
-                    msg.callPath.callRutina = node.varName;
+                    console.log("subFlow redefinido");
+                    var subFlowAInvocar = msg.callPath[msg.callPath.subFlowInvocado].subFlow;
+
+                    if ( msg.callPath[msg.callPath.subFlowInvocado].eventName )
+                        eventName = msg.callPath[msg.callPath.subFlowInvocado].eventName;
+                    else
+                        eventName = "call_path_" + msg.callPath[msg.callPath.subFlowInvocado].subFlow;
+
                 }
+                else
+                {
+                    var subFlowAInvocar = msg.callPath.subFlowInvocado;
+                    
+                }
+                // en el mensaje dejo en un stack la dirección de respuesta.
+                msg.callPath.stack.push({subFlowInvocado:node.varName,
+                                        subFlowAInvocar:subFlowAInvocar,
+                                        eventName:eventName,
+                                        eventRet:returnEventName});
+
                 if ( eventEmitter.listenerCount(eventName) ) {
                     eventEmitter.emit(eventName, msg);
                 } else {
@@ -84,9 +99,25 @@ module.exports = function(RED) {
 
         console.log("varName: "+this.varName);
         node.on('input', function(msg) {
+
+            node.primeraPasada = false;
             
             //if ( node.eventEmitter.listenerCount(node.varName) > 0 )
             {
+
+                if (msg.error) {  // para que se redispare el error en el nodo "call"
+                    msg.callPath.error = Object.assign({}, msg.error);
+
+                    if ( ! msg.callPath.error_stack )
+                        msg.callPath.error_stack =Object.assign([], []);
+                    // registro el error y el contexto (flujo) en donde se produjo
+                    msg.callPath.error_stack.push({error:msg.error,ctx:msg.callPath.stack[msg.callPath.stack.length-1] });
+
+                    if (! msg.callPath.error_call_stack)
+                        msg.callPath.error_call_stack = Object.assign({}, msg.callPath.stack ); 
+                };
+
+
 
                 var returnEventName = msg.callPath.stack.pop().eventRet;
 
@@ -192,9 +223,9 @@ module.exports = function(RED) {
 
             console.log("llegó evento a declarePaths");
             if ( msg.callPath.error ) delete msg.callPath.error;
-            var callRutina = msg.callPath.callRutina;
+            var subFlowInvocado = msg.callPath.subFlowInvocado;
             var vectorOut = [];
-            vectorOut[msg.callPath[callRutina].nro] = msg; 
+            vectorOut[msg.callPath[subFlowInvocado].nro] = msg; 
             node.send(vectorOut);
         });
 
@@ -222,6 +253,7 @@ module.exports = function(RED) {
                 //aux_wires = [node.wires[i]];
 
                 msg.callPath[varName] = {};
+                msg.callPath[varName].subflow = varName;
                 msg.callPath[varName].eventName = eventName;
                 msg.callPath[varName].nro = i;
             }
@@ -270,20 +302,14 @@ module.exports = function(RED) {
                     
                         msg.callPath.error_call_stack = Object.assign({}, msg.callPath.stack ); 
                 };
-                if (msg._error) msg.callPath._error = msg._error;
+                //if (msg._error) msg.callPath._error = msg._error;
+                //{
+                //}
+                var returnEventName = msg.callPath.stack.pop().eventRet;
 
-                {
-
-                    var returnEventName = msg.callPath.stack.pop().eventRet;
-
-                    console.log("rethrow: genero evento return :" + returnEventName );
-                    eventEmitter.emit(returnEventName, msg);
-                }
+                console.log("rethrow: genero evento return :" + returnEventName );
+                eventEmitter.emit(returnEventName, msg);
                 
-            }
-            else
-            {
-                node.send(msg);
             }
         });
     }
@@ -317,10 +343,15 @@ module.exports = function(RED) {
 
             node.primeraPasada = false;
 
-            if (msg.callPath.stack.length >= 1)  // quiere decir que el error fué lanzado dentro de un subflujo callPath.
+            if (msg.callPath.stack && msg.callPath.stack.length >= 1)  // quiere decir que el error fué lanzado dentro de un subflujo callPath.
             {                       // Indico al nodo llamador para que lance una excepción en su contexto.
                                     // no envio mensage por la salida, pero sería buena opción para agregar. 
-                if (msg.callPath.stack[msg.callPath.stack.length-1].name ==  this.varName)
+                if (msg.callPath.stack[msg.callPath.stack.length-1].subFlowAInvocar ==  this.varName)
+                    node.send(msg);
+            }
+            else
+            {// no estoy en un contexto, si está configurado para atrapar "" (null), quiere dicir (sin contexto).
+                if ( this.varName == "" )
                     node.send(msg);
             }
         });

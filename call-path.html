@@ -17,7 +17,7 @@
 //        },
         icon: "node-red-contrib-call-node.png",
         label: function() {
-            return this.name||"call-node";
+            return this.name||"call:"+this.paths;
         }
     });
 </script>
@@ -94,7 +94,7 @@
         },        
         icon: "node-red-contrib-insert-node.png",
         label: function() {
-            return this.name||"declare-path-node";
+            return this.name||"flow:"+this.paths;
         },
         oneditprepare: function() {
             var node = this;
@@ -564,7 +564,7 @@
         color: "rgb(112, 216, 130)",
         defaults: {
             name: {value:""},
-            paths: {value:'["path_1","other_path"]', required:true},
+            paths: {value:'flow'},
             timeout: {value:15000, validate:RED.validators.number()},
             finalTimeout: {value:60000, validate:RED.validators.number()}
         },
@@ -572,7 +572,10 @@
         outputs:1,
         icon: "node-red-contrib-insert-node.png",
         label: function() {
-            return this.name||"filter:"+this.paths;
+            if (this.paths)
+                return this.name||"filter:"+this.paths;
+            else
+                return this.name||"filter: all no flow";
         }
     });
 </script>
