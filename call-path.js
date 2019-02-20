@@ -52,7 +52,8 @@ module.exports = function(RED) {
                 msg.callPath.stack.push({subFlowInvocado:node.varName,
                                         subFlowAInvocar:subFlowAInvocar,
                                         eventName:eventName,
-                                        eventRet:returnEventName});
+                                        eventRet:returnEventName,
+                                        timestamp_ini:+ new Date()});
 
                 if ( eventEmitter.listenerCount(eventName) ) {
                     eventEmitter.emit(eventName, msg);
@@ -104,6 +105,7 @@ module.exports = function(RED) {
             
             //if ( node.eventEmitter.listenerCount(node.varName) > 0 )
             {
+                msg.callPath.stack[msg.callPath.stack.length-1]["timestamp_fin"] = + new Date();
 
                 if (msg.error) {  // para que se redispare el error en el nodo "call"
                     msg.callPath.error = Object.assign({}, msg.error);
@@ -117,6 +119,12 @@ module.exports = function(RED) {
                         msg.callPath.error_call_stack = Object.assign({}, msg.callPath.stack ); 
                 };
 
+
+                    top = msg.callPath.stack[msg.callPath.stack.length-1];
+                    console.log("return-path:" + top.subFlowAInvocar 
+                                + " msgid:" + msg._msgid 
+                                + " ms:" + (top.timestamp_fin - top.timestamp_ini)
+                                + " error:" + (msg.error ? msg.error.message : "" ));
 
 
                 var returnEventName = msg.callPath.stack.pop().eventRet;
