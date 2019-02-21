@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-    RED.nodes.registerType('call-node',{
+    RED.nodes.registerType('call-path',{
         category: 'function',
         color: "rgb(51, 153, 102)",
         defaults: {
@@ -11,18 +11,14 @@
         },
         inputs:1,
         outputs:1,
-//        outputLabels: function (index) {
-//            var labels = ["next","default"];
-//            return labels[index];
-//        },
-        icon: "node-red-contrib-call-node.png",
+        icon: "node-red-contrib-call-paths.png",
         label: function() {
             return this.name||"call:"+this.paths;
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="call-node">
+<script type="text/x-red" data-template-name="call-path">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -45,7 +41,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="call-node">
+<script type="text/x-red" data-help-name="call-path">
     <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
     <p>The defined variables must respect the form <code>msg.paths["variable_name"] = value</code> </p>
     <p>The variables are declared in configuration field <b>paths</b> with a json string array. Ej: ["variable_name","variable_name2","path3","otherPath","etc"]. Warning! the json string is not validating yet.</p>
@@ -73,7 +69,7 @@
 
 <script type="text/javascript">
 
-    RED.nodes.registerType('declare-path-node',{
+    RED.nodes.registerType('declare-path',{
         category: 'function',
         color: "rgb(112, 216, 130)",
         defaults: {
@@ -92,7 +88,7 @@
                 return label;
             }
         },        
-        icon: "node-red-contrib-insert-node.png",
+        icon: "node-red-contrib-call-paths.png",
         label: function() {
             return this.name||"flow:"+this.paths;
         },
@@ -156,7 +152,7 @@
 
 
 
-<script type="text/x-red" data-template-name="declare-path-node">
+<script type="text/x-red" data-template-name="declare-path">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -182,7 +178,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="declare-path-node">
+<script type="text/x-red" data-help-name="declare-path">
     <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
 </script>
 
@@ -208,7 +204,7 @@
         },
         inputs:1,
         outputs:0,
-        icon: "node-red-contrib-insert-node.png",
+        icon: "node-red-contrib-call-paths.png",
         label: function() {
             return this.name||"return-path";
         }
@@ -256,309 +252,6 @@
 
 <script type="text/javascript">
 
-    RED.nodes.registerType('return-node2',{
-        category: 'function',
-        color: "rgb(112, 216, 130)",
-        defaults: {
-            name: {value:""},
-            paths: {value:'["path_1","other_path"]', required:true},
-            timeout: {value:15000, validate:RED.validators.number()},
-            finalTimeout: {value:60000, validate:RED.validators.number()}
-        },
-        inputs:0,
-        outputs:1,
-        icon: "node-red-contrib-insert-node.png",
-        label: function() {
-            return this.name||"return-node2";
-        }
-    });
-</script>
-
-<script type="text/x-red" data-template-name="return-node2">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-paths"><i class="icon-tag"></i> Paths</label>
-        <input type="text" id="node-input-paths" placeholder="Paths">
-    </div>
-    <div class="form-row">
-        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
-        <input type="text" id="node-input-timeout" placeholder="Timeout">
-    </div>        
-    <div class="form-row">
-        <label for="node-input-finalTimeout"><i class="fa fa-clock-o"></i> finalTimeout</label>
-        <input type="text" id="node-input-finalTimeout" placeholder="FinalTimeout">        
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-        
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="return-node2">
-    <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-
-    RED.nodes.registerType('catch-node2',{
-        category: 'function',
-        color: "rgb(112, 216, 130)",
-        defaults: {
-            name: {value:""},
-            paths: {value:'["path_1","other_path"]', required:true},
-            timeout: {value:15000, validate:RED.validators.number()},
-            finalTimeout: {value:60000, validate:RED.validators.number()}
-        },
-        inputs:1,
-        outputs:1,
-        icon: "node-red-contrib-insert-node.png",
-        label: function() {
-            return this.name||"catch-node2";
-        }
-    });
-</script>
-
-<script type="text/x-red" data-template-name="catch-node2">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-paths"><i class="icon-tag"></i> Paths</label>
-        <input type="text" id="node-input-paths" placeholder="Paths">
-    </div>
-    <div class="form-row">
-        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
-        <input type="text" id="node-input-timeout" placeholder="Timeout">
-    </div>        
-    <div class="form-row">
-        <label for="node-input-finalTimeout"><i class="fa fa-clock-o"></i> finalTimeout</label>
-        <input type="text" id="node-input-finalTimeout" placeholder="FinalTimeout">        
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-        
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="catch-node2">
-    <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-
-    RED.nodes.registerType('declare-paths',{
-        category: 'function',
-        color: "rgb(112, 216, 130)",
-        defaults: {
-            name: {value:""},
-            paths: {value:'["path_1","other_path"]', required:true},
-            salidas: {value:["direct"]},
-            outputs: {value:2},
-            timeout: {value:15000, validate:RED.validators.number()},
-            finalTimeout: {value:60000, validate:RED.validators.number()}
-        },
-        inputs:1,
-        outputs:2,
-        outputLabels: function(index) {
-            var label = this.salidas[index];
-            if (label) {
-                return label;
-            }
-        },        
-        icon: "node-red-contrib-insert-node.png",
-        label: function() {
-            return this.name||"declare-paths";
-        },
-        oneditprepare: function() {
-            var node = this;
-
-            $("#node-input-rule-container").css('min-height','250px').css('min-width','450px').editableList({
-                addItem: function(container, index, data) {
-                        console.log(JSON.stringify("data:"+data));
-                        var row = $('<div/>').appendTo(container);
-
-                        var disabled = false;
-                        if (data.valor == "direct") disabled = true;
-
-                        var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;",value:data.valor,disabled:disabled}).appendTo(row).typedInput({default:'str',type:'str'});
-                        // elimino boton de borrar y el sort para la salida principal.
-                        if (data.valor == "direct")
-                        {
-                            container.closest('.red-ui-editableList-item-removable').find(".red-ui-editableList-item-remove").remove();
-                        }
-                        var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
-                        finalspan.append(' &#8594; <span class="node-input-rule-index">'+(index+1)+'</span> ');
-                },
-                removeItem: function(data) {
-
-                    console.log("An item has been removed");
-
-                },
-                sortable: false,
-                removable: true
-            });
-
-            for (var i=0;i<this.salidas.length;i++) {
-                var salida = this.salidas[i];
-                $("#node-input-rule-container").editableList('addItem',{valor:salida});
-            }
-        },
-        oneditsave: function() {
-            var node = this;
-            var salidas = $("#node-input-rule-container").editableList('items');
-            node.salidas = [];
-             
-            console.log("salidas: "+JSON.stringify(salidas));
-            salidas.each(function(i) {
-                //var dato = $(this).data('data');
-                var dato = $(this).find(".node-input-rule-value").typedInput('value');
-                
-                if ( i==0 ) dato = "direct"; // no permito cambiar la primer salida.
-
-                console.log("Item: " + JSON.stringify(dato));
-                node.salidas.push(dato);
-                node.outputs = node.salidas.length    
-            });
-            
-        }
-
-
-    });
-</script>
-
-
-
-
-<script type="text/x-red" data-template-name="declare-paths">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-paths"><i class="icon-tag"></i> Paths</label>
-        <input type="text" id="node-input-paths" placeholder="Paths">
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-    </div>
-    <div class="form-row">
-        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
-        <input type="text" id="node-input-timeout" placeholder="Timeout">
-    </div>        
-    <div class="form-row">
-        <label for="node-input-finalTimeout"><i class="fa fa-clock-o"></i> finalTimeout</label>
-        <input type="text" id="node-input-finalTimeout" placeholder="FinalTimeout">        
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-        
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="declare-paths">
-    <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-
-    RED.nodes.registerType('rethrow-path',{
-        category: 'function',
-        color: "rgb(112, 216, 130)",
-        defaults: {
-            name: {value:""},
-            paths: {value:'["path_1","other_path"]', required:true},
-            timeout: {value:15000, validate:RED.validators.number()},
-            finalTimeout: {value:60000, validate:RED.validators.number()}
-        },
-        inputs:1,
-        outputs:1,
-        icon: "node-red-contrib-insert-node.png",
-        label: function() {
-            return this.name||"rethrow-path";
-        }
-    });
-</script>
-
-<script type="text/x-red" data-template-name="rethrow-path">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-paths"><i class="icon-tag"></i> Paths</label>
-        <input type="text" id="node-input-paths" placeholder="Paths">
-    </div>
-    <div class="form-row">
-        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
-        <input type="text" id="node-input-timeout" placeholder="Timeout">
-    </div>        
-    <div class="form-row">
-        <label for="node-input-finalTimeout"><i class="fa fa-clock-o"></i> finalTimeout</label>
-        <input type="text" id="node-input-finalTimeout" placeholder="FinalTimeout">        
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-        
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="rethrow-path">
-    <p>Wait for incoming messages from diferent paths to generate only an output message with the declared variables under <code>msg.paths</code> merged. Each variable under <code>msg.paths</code> corresponds with an input path, and should be initialized on a different input path</p>
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-
     RED.nodes.registerType('catch-filter-path',{
         category: 'function',
         color: "rgb(112, 216, 130)",
@@ -570,7 +263,7 @@
         },
         inputs:1,
         outputs:1,
-        icon: "node-red-contrib-insert-node.png",
+        icon: "node-red-contrib-call-paths.png",
         label: function() {
             if (this.paths)
                 return this.name||"filter:"+this.paths;
