@@ -108,6 +108,7 @@
     RED.nodes.registerType('return-path',{
         category: 'function',
         color: "rgb(112, 216, 130)",
+        align: 'right',
         defaults: {
             name: {value:""}
         },
@@ -155,7 +156,7 @@
         color: "rgb(112, 216, 130)",
         defaults: {
             name: {value:""},
-            flowName: {value:'flow'}
+            flowName: {value:'callPathFlowName'}
         },
         inputs:1,
         outputs:1,
