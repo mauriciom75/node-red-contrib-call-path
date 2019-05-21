@@ -1,6 +1,6 @@
 {
     "name" : "node-red-contrib-call-path",
-    "version": "0.2.9",
+    "version": "0.0.1",
     "description": "In progress.",
     "repository": {
         "type": "git",
