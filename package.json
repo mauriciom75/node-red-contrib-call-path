@@ -7,7 +7,7 @@
         "url": "https://github.com/mauriciom75/node-red-contrib-call-path.git"
     },
     "keywords": [
-        "node-red"
+        "none"
     ],
     "node-red" : {
         "nodes": {
